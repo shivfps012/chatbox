@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, X, Copy, Download, FileText, File, Moon, Sun, LogOut, Settings } from 'lucide-react';
-import MessageBubble from './MessageBubble';
-import FileUpload from './FileUpload';
-import { Message, FileAttachment } from '../types/chat';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { Send, Paperclip, X, Copy, Download, FileText, File, Moon, Sun, LogOut, Settings, User } from 'lucide-react';
+import MessageBubble from './MessageBubble.jsx';
+import FileUpload from './FileUpload.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { useTheme } from '../contexts/ThemeContext.jsx';
 
-const ChatInterface: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
+const ChatInterface = ({ onShowProfile }) => {
+  const [messages, setMessages] = useState([
     {
       id: '1',
       content: 'Hello! I\'m your AI assistant. You can chat with me and upload files (PDF, MSG, EML, TXT, DOCX) for analysis.',
@@ -18,8 +17,8 @@ const ChatInterface: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
@@ -34,7 +33,7 @@ const ChatInterface: React.FC = () => {
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    const newMessage: Message = {
+    const newMessage = {
       id: Date.now().toString(),
       content: inputValue,
       sender: 'user',
@@ -47,7 +46,7 @@ const ChatInterface: React.FC = () => {
 
     // Simulate AI response
     setTimeout(() => {
-      const responseMessage: Message = {
+      const responseMessage = {
         id: (Date.now() + 1).toString(),
         content: `I received your message: "${inputValue}". How can I help you further?`,
         sender: 'assistant',
@@ -58,16 +57,16 @@ const ChatInterface: React.FC = () => {
     }, 1500);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
-  const handleFileUpload = (files: FileList) => {
+  const handleFileUpload = (files) => {
     Array.from(files).forEach(file => {
-      const attachment: FileAttachment = {
+      const attachment = {
         id: Date.now().toString() + Math.random(),
         name: file.name,
         size: file.size,
@@ -75,7 +74,7 @@ const ChatInterface: React.FC = () => {
         url: URL.createObjectURL(file)
       };
 
-      const fileMessage: Message = {
+      const fileMessage = {
         id: Date.now().toString() + Math.random(),
         content: `Uploaded file: ${file.name}`,
         sender: 'user',
@@ -87,7 +86,7 @@ const ChatInterface: React.FC = () => {
     });
   };
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -97,7 +96,7 @@ const ChatInterface: React.FC = () => {
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -118,17 +117,39 @@ const ChatInterface: React.FC = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              {user?.avatar && (
+              {user?.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user.name}
+                  className="w-8 h-8 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                  onClick={onShowProfile}
+                />
+              ) : user?.avatar ? (
                 <img
                   src={user.avatar}
                   alt={user.name}
-                  className="w-8 h-8 rounded-full"
+                  className="w-8 h-8 rounded-full cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                  onClick={onShowProfile}
                 />
+              ) : (
+                <div 
+                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                  onClick={onShowProfile}
+                >
+                  <User className="h-4 w-4 text-white" />
+                </div>
               )}
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {user?.name}
               </span>
             </div>
+            <button
+              onClick={onShowProfile}
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+              title="Profile Settings"
+            >
+              <Settings className="h-5 w-5" />
+            </button>
             <button
               onClick={toggleTheme}
               className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
@@ -211,7 +232,7 @@ const ChatInterface: React.FC = () => {
                 rows={1}
                 style={{ height: 'auto' }}
                 onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
+                  const target = e.target;
                   target.style.height = 'auto';
                   target.style.height = Math.min(target.scrollHeight, 128) + 'px';
                 }}

@@ -1,22 +1,16 @@
 import React, { useRef } from 'react';
 import { Upload, X, FileText, File } from 'lucide-react';
 
-interface FileUploadProps {
-  onFileUpload: (files: FileList) => void;
-  maxSize?: number; // in MB
-  acceptedTypes?: string[];
-}
-
-const FileUpload: React.FC<FileUploadProps> = ({ 
+const FileUpload = ({ 
   onFileUpload, 
   maxSize = 10, 
   acceptedTypes = ['.pdf', '.msg', '.eml', '.txt', '.docx', '.doc'] 
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef(null);
 
-  const handleFileSelect = (files: FileList) => {
-    const validFiles: File[] = [];
-    const errors: string[] = [];
+  const handleFileSelect = (files) => {
+    const validFiles = [];
+    const errors = [];
 
     Array.from(files).forEach(file => {
       // Check file size

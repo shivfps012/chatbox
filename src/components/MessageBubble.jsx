@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Download, FileText, File, CheckCircle } from 'lucide-react';
-import { Message } from '../types/chat';
 
-interface MessageBubbleProps {
-  message: Message;
-}
-
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+const MessageBubble = ({ message }) => {
   const [copied, setCopied] = useState(false);
   const isUser = message.sender === 'user';
 
@@ -16,7 +11,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const formatFileSize = (bytes: number) => {
+  const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -24,7 +19,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const getFileIcon = (type: string, name: string) => {
+  const getFileIcon = (type, name) => {
     if (type.includes('pdf') || name.endsWith('.pdf')) {
       return <FileText className="h-5 w-5 text-red-500" />;
     }
