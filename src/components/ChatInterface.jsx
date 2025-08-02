@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, X, Copy, Download, FileText, File, Moon, Sun, LogOut, Settings, User } from 'lucide-react';
+import { Send, Paperclip, X, Copy, Download, FileText, File, Moon, Sun, LogOut, Settings, User, Image } from 'lucide-react';
 import MessageBubble from './MessageBubble.jsx';
 import FileUpload from './FileUpload.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -76,7 +76,7 @@ const ChatInterface = ({ onShowProfile }) => {
 
       const fileMessage = {
         id: Date.now().toString() + Math.random(),
-        content: `Uploaded file: ${file.name}`,
+        content: file.type.startsWith('image/') ? `Shared an image: ${file.name}` : `Uploaded file: ${file.name}`,
         sender: 'user',
         timestamp: new Date(),
         attachments: [attachment]
@@ -218,6 +218,7 @@ const ChatInterface = ({ onShowProfile }) => {
             <button
               onClick={() => fileInputRef.current?.click()}
               className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+              title="Upload files or images"
             >
               <Paperclip className="h-5 w-5" />
             </button>
@@ -255,7 +256,7 @@ const ChatInterface = ({ onShowProfile }) => {
         ref={fileInputRef}
         type="file"
         multiple
-        accept=".pdf,.msg,.eml,.txt,.docx,.doc"
+        accept=".pdf,.msg,.eml,.txt,.docx,.doc,image/*"
         onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
         className="hidden"
       />

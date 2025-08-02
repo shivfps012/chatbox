@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Download, FileText, File, CheckCircle } from 'lucide-react';
+import { Copy, Download, FileText, File, CheckCircle, Image as ImageIcon } from 'lucide-react';
 
 const MessageBubble = ({ message }) => {
   const [copied, setCopied] = useState(false);
@@ -20,6 +20,9 @@ const MessageBubble = ({ message }) => {
   };
 
   const getFileIcon = (type, name) => {
+    if (type.startsWith('image/')) {
+      return <ImageIcon className="h-5 w-5 text-green-500" />;
+    }
     if (type.includes('pdf') || name.endsWith('.pdf')) {
       return <FileText className="h-5 w-5 text-red-500" />;
     }
@@ -57,35 +60,78 @@ const MessageBubble = ({ message }) => {
           {message.attachments && message.attachments.length > 0 && (
             <div className="mt-3 space-y-2">
               {message.attachments.map((attachment) => (
-                <div key={attachment.id} className={`flex items-center space-x-3 p-3 rounded-lg border ${
-                  isUser ? 'bg-blue-500 dark:bg-blue-600 border-blue-400 dark:border-blue-500' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-                }`}>
-                  {getFileIcon(attachment.type, attachment.name)}
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${
-                      isUser ? 'text-white' : 'text-gray-900 dark:text-white'
+                <div key={attachment.id}>
+                  {attachment.type.startsWith('image/') ? (
+                    // Image Preview
+                    <div className={`relative rounded-lg overflow-hidden max-w-sm ${
+                      isUser ? 'ml-auto' : ''
                     }`}>
-                      {attachment.name}
-                    </p>
-                    <p className={`text-xs ${
-                      isUser ? 'text-blue-100 dark:text-blue-200' : 'text-gray-500 dark:text-gray-400'
+                      <img
+                        src={attachment.url}
+                        alt={attachment.name}
+                        className="w-full h-auto max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => {
+                          // Open image in new tab for full view
+                          window.open(attachment.url, '_blank');
+                        }}
+                      />
+                      <div className={`absolute top-2 right-2 flex space-x-1`}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const link = document.createElement('a');
+                            link.href = attachment.url;
+                            link.download = attachment.name;
+                            link.click();
+                          }}
+                          className="p-1.5 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-colors"
+                          title="Download image"
+                        >
+                          <Download className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2`}>
+                        <p className="text-white text-xs font-medium truncate">
+                          {attachment.name}
+                        </p>
+                        <p className="text-white text-xs opacity-75">
+                          {formatFileSize(attachment.size)}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    // Regular File Attachment
+                    <div className={`flex items-center space-x-3 p-3 rounded-lg border ${
+                      isUser ? 'bg-blue-500 dark:bg-blue-600 border-blue-400 dark:border-blue-500' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
                     }`}>
-                      {formatFileSize(attachment.size)}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const link = document.createElement('a');
-                      link.href = attachment.url;
-                      link.download = attachment.name;
-                      link.click();
-                    }}
-                    className={`p-1 rounded hover:bg-opacity-20 hover:bg-white transition-colors ${
-                      isUser ? 'text-white' : 'text-gray-500 dark:text-gray-400'
-                    }`}
-                  >
-                    <Download className="h-4 w-4" />
-                  </button>
+                      {getFileIcon(attachment.type, attachment.name)}
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium truncate ${
+                          isUser ? 'text-white' : 'text-gray-900 dark:text-white'
+                        }`}>
+                          {attachment.name}
+                        </p>
+                        <p className={`text-xs ${
+                          isUser ? 'text-blue-100 dark:text-blue-200' : 'text-gray-500 dark:text-gray-400'
+                        }`}>
+                          {formatFileSize(attachment.size)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = attachment.url;
+                          link.download = attachment.name;
+                          link.click();
+                        }}
+                        className={`p-1 rounded hover:bg-opacity-20 hover:bg-white transition-colors ${
+                          isUser ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                        }`}
+                      >
+                        <Download className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
