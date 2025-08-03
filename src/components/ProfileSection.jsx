@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useTheme } from '../contexts/ThemeContext.jsx';
 
 const ProfileSection = ({ onBack }) => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, uploadProfileImage } = useAuth();
   const { isDark } = useTheme();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -17,15 +17,22 @@ const ProfileSection = ({ onBack }) => {
   const handleSave = async () => {
     setIsSaving(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    updateUser({ name: name.trim(), email: email.trim() });
-    setIsEditing(false);
-    setIsSaving(false);
+    try {
+      const result = await updateUser({ name: name.trim(), email: email.trim() });
+      
+      if (result.success) {
+        setIsEditing(false);
+      } else {
+        alert(result.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      alert('An error occurred while updating your profile');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleImageUpload = (file) => {
+  const handleImageUpload = async (file) => {
     if (!file) return;
 
     // Validate file type
@@ -40,14 +47,41 @@ const ProfileSection = ({ onBack }) => {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imageUrl = e.target.result;
-      updateUser({ profileImage: imageUrl });
+    try {
+      const result = await uploadProfileImage(file);
+      
+      if (result.success) {
+        setUploadSuccess(true);
+        setTimeout(() => setUploadSuccess(false), 2000);
+      } else {
+        alert(result.message || 'Failed to upload image');
+      }
+    } catch (error) {
+      alert('An error occurred while uploading the image');
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/user/profile-image', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        updateUser({ profileImage: null });
       setUploadSuccess(true);
       setTimeout(() => setUploadSuccess(false), 2000);
-    };
-    reader.readAsDataURL(file);
+      } else {
+        alert('Failed to remove profile image');
+      }
+    } catch (error) {
+      alert('An error occurred while removing the image');
+    }
   };
 
   const handleDrag = (e) => {

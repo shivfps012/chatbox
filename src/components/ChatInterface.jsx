@@ -5,6 +5,8 @@ import FileUpload from './FileUpload.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useTheme } from '../contexts/ThemeContext.jsx';
 
+const API_BASE_URL = 'http://localhost:5000/api';
+
 const ChatInterface = ({ onShowProfile }) => {
   const [messages, setMessages] = useState([
     {
@@ -17,10 +19,19 @@ const ChatInterface = ({ onShowProfile }) => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [currentChatId, setCurrentChatId] = useState(null);
+  const [chats, setChats] = useState([]);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
-  const { user, logout } = useAuth();
+  const { user, logout, token, getAuthHeaders } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    if (user && token) {
+      loadChats();
+      createNewChat();
+    }
+  }, [user, token]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -30,8 +41,50 @@ const ChatInterface = ({ onShowProfile }) => {
     scrollToBottom();
   }, [messages]);
 
+  const loadChats = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
+        headers: getAuthHeaders()
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setChats(data.chats);
+      }
+    } catch (error) {
+      console.error('Error loading chats:', error);
+    }
+  };
+
+  const createNewChat = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          title: 'New Chat'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentChatId(data.chat._id);
+        setMessages(data.chat.messages || [
+          {
+            id: '1',
+            content: 'Hello! I\'m your AI assistant. You can chat with me and upload files (PDF, MSG, EML, TXT, DOCX) for analysis.',
+            sender: 'assistant',
+            timestamp: new Date(),
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error creating chat:', error);
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || !currentChatId) return;
 
     const newMessage = {
       id: Date.now().toString(),
@@ -44,17 +97,49 @@ const ChatInterface = ({ onShowProfile }) => {
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const responseMessage = {
-        id: (Date.now() + 1).toString(),
-        content: `I received your message: "${inputValue}". How can I help you further?`,
-        sender: 'assistant',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, responseMessage]);
+    try {
+      // Send message to backend
+      const response = await fetch(`${API_BASE_URL}/chat/${currentChatId}/messages`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          content: inputValue,
+          sender: 'user'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // The backend will automatically generate AI response
+        // We'll poll for updates or use WebSocket in production
+        setTimeout(() => {
+          loadCurrentChat();
+          setIsTyping(false);
+        }, 2000);
+      } else {
+        setIsTyping(false);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
       setIsTyping(false);
-    }, 1500);
+    }
+  };
+
+  const loadCurrentChat = async () => {
+    if (!currentChatId) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat/${currentChatId}`, {
+        headers: getAuthHeaders()
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.chat.messages);
+      }
+    } catch (error) {
+      console.error('Error loading chat:', error);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -65,24 +150,40 @@ const ChatInterface = ({ onShowProfile }) => {
   };
 
   const handleFileUpload = (files) => {
+    if (!currentChatId) return;
+
+    const formData = new FormData();
     Array.from(files).forEach(file => {
-      const attachment = {
-        id: Date.now().toString() + Math.random(),
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        url: URL.createObjectURL(file)
-      };
+      formData.append('files', file);
+    });
+    formData.append('chatId', currentChatId);
+    formData.append('messageId', Date.now().toString());
 
-      const fileMessage = {
-        id: Date.now().toString() + Math.random(),
-        content: file.type.startsWith('image/') ? `Shared an image: ${file.name}` : `Uploaded file: ${file.name}`,
-        sender: 'user',
-        timestamp: new Date(),
-        attachments: [attachment]
-      };
+    // Upload files to backend
+    fetch(`${API_BASE_URL}/files/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.files) {
+        // Create message with uploaded files
+        const fileMessage = {
+          id: Date.now().toString(),
+          content: `Uploaded ${data.files.length} file(s)`,
+          sender: 'user',
+          timestamp: new Date(),
+          attachments: data.files
+        };
 
-      setMessages(prev => [...prev, fileMessage]);
+        setMessages(prev => [...prev, fileMessage]);
+      }
+    })
+    .catch(error => {
+      console.error('Error uploading files:', error);
     });
   };
 
