@@ -10,84 +10,291 @@ export const useAuth = () => {
   return context;
 };
 
+const API_BASE_URL = 'http://localhost:5000/api';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    // Check for stored user session
+    // Check for stored token and user session
+    const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    
+    if (storedToken && storedUser) {
+      setToken(storedToken);
       setUser(JSON.parse(storedUser));
+      // Verify token is still valid
+      verifyToken(storedToken);
+    } else {
+      // Check for Google OAuth success redirect
+      const urlParams = new URLSearchParams(window.location.search);
+      const authToken = urlParams.get('token');
+      
+      if (authToken) {
+        handleGoogleAuthSuccess(authToken);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     }
+    
     setIsLoading(false);
   }, []);
+
+  const verifyToken = async (authToken) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      } else {
+        // Token is invalid, clear storage
+        logout();
+      }
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      logout();
+    }
+  };
+
+  const handleGoogleAuthSuccess = async (authToken) => {
+    try {
+      setToken(authToken);
+      localStorage.setItem('token', authToken);
+      
+      // Get user data
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+    } catch (error) {
+      console.error('Google auth success handling failed:', error);
+    }
+  };
 
   const login = async (email, password) => {
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock authentication - in real app, this would be an API call
-    if (email && password.length >= 6) {
-      const userData = {
-        id: '1',
-        email,
-        name: email.split('@')[0],
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        profileImage: null
-      };
-      
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setToken(data.token);
+        setUser(data.user);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setIsLoading(false);
+        return { success: true };
+      } else {
+        setIsLoading(false);
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       setIsLoading(false);
-      return true;
+      return { success: false, message: 'Network error. Please try again.' };
     }
-    
-    setIsLoading(false);
-    return false;
   };
 
   const signup = async (email, password, name) => {
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock registration - in real app, this would be an API call
-    if (email && password.length >= 6 && name.trim()) {
-      const userData = {
-        id: Date.now().toString(),
-        email,
-        name: name.trim(),
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        profileImage: null
-      };
-      
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password, name })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setToken(data.token);
+        setUser(data.user);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setIsLoading(false);
+        return { success: true };
+      } else {
+        setIsLoading(false);
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
       setIsLoading(false);
-      return true;
+      return { success: false, message: 'Network error. Please try again.' };
     }
-    
-    setIsLoading(false);
-    return false;
   };
 
-  const updateUser = (updatedData) => {
-    const newUserData = { ...user, ...updatedData };
-    setUser(newUserData);
-    localStorage.setItem('user', JSON.stringify(newUserData));
+  const forgotPassword = async (email) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+      return { success: response.ok, message: data.message };
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      return { success: false, message: 'Network error. Please try again.' };
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const resetPassword = async (token, password) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setToken(data.token);
+        setUser(data.user);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error('Reset password error:', error);
+      return { success: false, message: 'Network error. Please try again.' };
+    }
   };
+
+  const googleLogin = () => {
+    window.location.href = `${API_BASE_URL}/auth/google`;
+  };
+
+  const updateUser = async (updatedData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/profile`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        return { success: true };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error('Update user error:', error);
+      return { success: false, message: 'Network error. Please try again.' };
+    }
+  };
+
+  const uploadProfileImage = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+
+      const response = await fetch(`${API_BASE_URL}/user/profile-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        return { success: true };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error('Profile image upload error:', error);
+      return { success: false, message: 'Network error. Please try again.' };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      if (token) {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    }
+  };
+
+  const getAuthHeaders = () => ({
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  });
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, updateUser, isLoading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token,
+      login, 
+      signup, 
+      logout, 
+      updateUser, 
+      uploadProfileImage,
+      forgotPassword,
+      resetPassword,
+      googleLogin,
+      getAuthHeaders,
+      isLoading 
+    }}>
       {children}
     </AuthContext.Provider>
   );
