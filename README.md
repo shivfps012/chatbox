@@ -1,37 +1,48 @@
-# chatbox
+# Chatbox
 
-A full-stack AI chat application with file upload capabilities, user authentication, and Google OAuth integration.
+A full-stack AI chat application with file upload capabilities, comprehensive user authentication, and Google OAuth integration.
 
-## Features
+![Chatbox Logo](https://img.shields.io/badge/Chatbox-AI%20Chat%20Application-blue)
+![Version](https://img.shields.io/badge/version-1.0.0-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-- 🤖 **AI Chat Interface**: Interactive chat with AI assistant
-- 📁 **File Upload**: Support for documents (PDF, DOC, TXT) and images
-- 🔐 **Authentication**: Email/password and Google OAuth login
-- 🔑 **Password Reset**: Email-based password recovery
-- 💾 **Chat History**: Persistent chat storage per user
-- 👤 **User Profiles**: Customizable user profiles with avatar upload
+## 📌 Overview
+
+Chatbox is a modern web application that provides an intuitive interface for interacting with AI assistants while supporting robust user management, file sharing, and real-time communication.
+
+## ✨ Features
+
+- 🤖 **AI Chat Interface**: Interactive conversations with AI assistant
+- 📁 **File Upload System**: Support for documents (PDF, DOC, TXT) and images
+- 🔐 **Authentication**: Secure email/password and Google OAuth integration
+- 🔑 **Password Reset Flow**: Email-based password recovery system
+- 💾 **Chat Persistence**: User chat history saved across sessions
+- 👤 **User Profiles**: Customizable profiles with avatar upload
+- 📊 **User Statistics**: Track messages, uploads, and active days
 - 🌙 **Dark Mode**: Toggle between light and dark themes
-- 📱 **Responsive Design**: Works on desktop and mobile devices
+- 📱 **Responsive Design**: Optimized for desktop and mobile devices
+- 🔒 **Secure File Storage**: User-specific file organization
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 ### Frontend
-- React 18
-- Tailwind CSS
-- Lucide React (icons)
-- Vite (build tool)
+- **React 18**: Modern UI framework
+- **Tailwind CSS**: Utility-first CSS framework for responsive design
+- **Lucide React**: Modern icon library
+- **Vite**: Next-generation frontend build tool
 
 ### Backend
-- Node.js
-- Express.js
-- MongoDB with Mongoose
-- JWT Authentication
-- Passport.js (Google OAuth)
-- Multer (file uploads)
-- Nodemailer (email sending)
-- bcryptjs (password hashing)
+- **Node.js**: JavaScript runtime
+- **Express.js**: Web framework
+- **MongoDB**: NoSQL database
+- **Mongoose**: MongoDB object modeling
+- **JWT**: JSON Web Token authentication
+- **Passport.js**: Authentication middleware with Google OAuth support
+- **Multer**: File upload handling
+- **Nodemailer**: Email sending functionality
+- **bcryptjs**: Password hashing
 
-## Setup Instructions
+## 🚀 Setup Instructions
 
 ### Prerequisites
 - Node.js (v16 or higher)
@@ -41,12 +52,18 @@ A full-stack AI chat application with file upload capabilities, user authenticat
 
 ### Backend Setup
 
-1. **Install dependencies:**
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/shivfps012/chatbox.git
+   cd chatbox
+   ```
+
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. **Environment Configuration:**
+3. **Environment Configuration:**
    Create a `.env` file in the root directory with the following variables:
 
    ```env
@@ -79,24 +96,121 @@ A full-stack AI chat application with file upload capabilities, user authenticat
    UPLOAD_PATH=./uploads
    ```
 
-3. **Google OAuth Setup:**
+4. **Google OAuth Setup:**
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Create a new project or select existing one
    - Enable Google+ API
    - Create OAuth 2.0 credentials
    - Add authorized redirect URI: `http://localhost:5000/api/auth/google/callback`
    - Copy Client ID and Client Secret to `.env`
+   
+   For detailed instructions, see [GOOGLE_OAUTH_SETUP_GUIDE.md](./GOOGLE_OAUTH_SETUP_GUIDE.md)
 
-4. **Gmail App Password:**
+5. **Gmail App Password:**
    - Enable 2-factor authentication on your Gmail account
    - Generate an App Password for the application
    - Use this App Password in `EMAIL_PASS`
+   
+   For detailed instructions, see [EMAIL_SETUP_GUIDE.md](./EMAIL_SETUP_GUIDE.md)
 
-5. **Start the backend server:**
+### Frontend Setup
+
+1. **Start the development server:**
    ```bash
-   npm run server:dev
+   npm run dev
    ```
-   Server will run on http://localhost:5000
+
+   This will start both the backend server and frontend development server.
+   - Frontend: http://localhost:5173
+   - Backend: http://localhost:5000
+
+2. **Building for production:**
+   ```bash
+   npm run build
+   ```
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+
+- **POST /api/auth/register**: Register a new user
+- **POST /api/auth/login**: Login with email and password
+- **GET /api/auth/google**: Initiate Google OAuth login
+- **GET /api/auth/google/callback**: Google OAuth callback
+- **POST /api/auth/forgot-password**: Request password reset
+- **POST /api/auth/reset-password/:token**: Reset password with token
+- **GET /api/auth/me**: Get current user profile
+
+### User Endpoints
+
+- **GET /api/user/profile**: Get user profile
+- **PUT /api/user/profile**: Update user profile
+- **PUT /api/user/password**: Change password
+- **GET /api/user/stats**: Get user statistics
+
+### Chat Endpoints
+
+- **GET /api/chat**: Get all chats for current user
+- **POST /api/chat**: Create a new chat message
+- **DELETE /api/chat/:id**: Delete a chat message
+
+### File Endpoints
+
+- **POST /api/files/upload**: Upload a file
+- **GET /api/files**: Get all files for current user
+- **GET /api/files/:id**: Get file by ID
+- **DELETE /api/files/:id**: Delete a file
+
+## 🧪 Testing
+
+Run the tests with:
+
+```bash
+npm test
+```
+
+For specific test suites:
+
+```bash
+# Test authentication
+npm run test-auth
+
+# Test email functionality
+npm run test-email
+
+# Test Google OAuth flow
+npm run test-google-oauth
+
+# Test stats API
+npm run test-stats-api
+```
+
+## 🔧 Troubleshooting
+
+Common issues and their solutions:
+
+- **Google OAuth Issues**: See [GOOGLE_OAUTH_ERROR_FIX.md](./GOOGLE_OAUTH_ERROR_FIX.md)
+- **Password Reset Issues**: See [PASSWORD_RESET_GUIDE.md](./PASSWORD_RESET_GUIDE.md)
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👥 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add some amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## 📬 Contact
+
+Shiv - shivgupta45750@gmail.com
+
+Project Link: [https://github.com/shivfps012/chatbox](https://github.com/shivfps012/chatbox)
 
 ### Frontend Setup
 
