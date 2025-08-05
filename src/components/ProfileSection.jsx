@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { ArrowLeft, Camera, User, Mail, Save, Upload, X, Check } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useTheme } from '../contexts/ThemeContext.jsx';
+import AccountStatistics from './AccountStatistics';
 
 const ProfileSection = ({ onBack }) => {
   const { user, updateUser, uploadProfileImage } = useAuth();
@@ -112,10 +113,10 @@ const ProfileSection = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+      {/* Header - Made more responsive for small screens */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3 sm:space-x-4 w-full">
             <button
               onClick={onBack}
               className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
@@ -131,7 +132,7 @@ const ProfileSection = ({ onBack }) => {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto justify-center sm:justify-start"
             >
               {isSaving ? (
                 <>
@@ -149,14 +150,14 @@ const ProfileSection = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Profile Content */}
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      {/* Profile Content - Improved spacing for mobile */}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Profile Image Section */}
-          <div className="p-8 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Profile Picture</h2>
+          {/* Profile Image Section - Made responsive with flex-wrap */}
+          <div className="p-4 sm:p-8 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 sm:mb-6">Profile Picture</h2>
             
-            <div className="flex items-center space-x-6">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
               {/* Current Profile Image */}
               <div className="relative">
                 {user?.profileImage ? (
@@ -190,10 +191,10 @@ const ProfileSection = ({ onBack }) => {
                 )}
               </div>
 
-              {/* Upload Area */}
-              <div className="flex-1">
+              {/* Upload Area - Full width on mobile */}
+              <div className="flex-1 w-full sm:w-auto">
                 <div
-                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+                  className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-colors cursor-pointer ${
                     dragActive
                       ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                       : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
@@ -204,9 +205,9 @@ const ProfileSection = ({ onBack }) => {
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
                 >
-                  <Camera className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500 mb-2" />
+                  <Camera className="mx-auto h-6 sm:h-8 w-6 sm:w-8 text-gray-400 dark:text-gray-500 mb-2" />
                   <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                    Click to upload or drag and drop
+                    {window.innerWidth < 400 ? 'Upload image' : 'Click to upload or drag and drop'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     PNG, JPG, GIF up to 5MB
@@ -224,21 +225,21 @@ const ProfileSection = ({ onBack }) => {
             </div>
           </div>
 
-          {/* Profile Information */}
-          <div className="p-8">
-            <div className="flex items-center justify-between mb-6">
+          {/* Profile Information - Improved mobile spacing and layout */}
+          <div className="p-4 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Personal Information</h2>
               {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                  className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors w-full sm:w-auto text-center"
                 >
                   Edit Profile
                 </button>
               )}
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Name Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -253,14 +254,14 @@ const ProfileSection = ({ onBack }) => {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                      className="block w-full pl-10 pr-3 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm"
                       placeholder="Enter your full name"
                     />
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <User className="h-5 w-5 text-gray-400" />
-                    <span className="text-gray-900 dark:text-white">{user?.name || 'Not set'}</span>
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden text-ellipsis">
+                    <User className="h-5 w-5 flex-shrink-0 text-gray-400" />
+                    <span className="text-gray-900 dark:text-white truncate">{user?.name || 'Not set'}</span>
                   </div>
                 )}
               </div>
@@ -279,35 +280,35 @@ const ProfileSection = ({ onBack }) => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                      className="block w-full pl-10 pr-3 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm"
                       placeholder="Enter your email address"
                     />
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                    <span className="text-gray-900 dark:text-white">{user?.email || 'Not set'}</span>
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden">
+                    <Mail className="h-5 w-5 flex-shrink-0 text-gray-400" />
+                    <span className="text-gray-900 dark:text-white truncate">{user?.email || 'Not set'}</span>
                   </div>
                 )}
               </div>
 
-              {/* Cancel/Save Buttons for Editing */}
+              {/* Cancel/Save Buttons for Editing - Full width on mobile */}
               {isEditing && (
-                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <button
                     onClick={() => {
                       setIsEditing(false);
                       setName(user?.name || '');
                       setEmail(user?.email || '');
                     }}
-                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors w-full sm:w-auto"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
                   >
                     {isSaving ? (
                       <>
@@ -327,24 +328,9 @@ const ProfileSection = ({ onBack }) => {
           </div>
         </div>
 
-        {/* Account Stats */}
-        <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Account Statistics</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">12</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Messages Sent</div>
-            </div>
-            <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">5</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Files Uploaded</div>
-            </div>
-            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">3</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Days Active</div>
-            </div>
-          </div>
+        {/* Account Stats - Better spacing on mobile */}
+        <div className="mt-6 sm:mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-8">
+          <AccountStatistics />
         </div>
       </div>
     </div>

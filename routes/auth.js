@@ -198,29 +198,28 @@ router.post('/reset-password', async (req, res) => {
 // @desc    Google OAuth login
 // @access  Public
 router.get('/google', passport.authenticate('google', {
-  scope: ['profile', 'email']
+  scope: process.env.GOOGLE_AUTH_SCOPES ? process.env.GOOGLE_AUTH_SCOPES.split(',') : ['profile', 'email'],
+  prompt: 'select_account' // Always show account selector
 }));
 
-// @route   GET /api/auth/google/callback
-// @desc    Google OAuth callback
-// @access  Public
-router.get('/google/callback', 
-  passport.authenticate('google', { session: false }),
-  (req, res) => {
-    try {
-      // Generate JWT token
-      const token = generateToken(req.user._id);
-      
-      // Redirect to frontend with token
-      res.redirect(`${process.env.CLIENT_URL}/auth/success?token=${token}`);
-    } catch (error) {
-      console.error('Google callback error:', error);
-      res.redirect(`${process.env.CLIENT_URL}/auth/error`);
+  // @route   GET /api/auth/google/callback
+  // @desc    Google OAuth callback
+  // @access  Public
+  router.get('/google/callback', 
+    passport.authenticate('google', { session: false }),
+    (req, res) => {
+      try {
+        // Generate JWT token
+        const token = generateToken(req.user._id);
+        
+        // Redirect to frontend with token
+        res.redirect(`${process.env.CLIENT_URL}/auth/success?token=${token}`);
+      } catch (error) {
+        console.error('Google callback error:', error);
+        res.redirect(`${process.env.CLIENT_URL}/auth/error`);
+      }
     }
-  }
-);
-
-// @route   GET /api/auth/me
+  );// @route   GET /api/auth/me
 // @desc    Get current user
 // @access  Private
 router.get('/me', auth, async (req, res) => {

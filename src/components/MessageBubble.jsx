@@ -39,37 +39,37 @@ const MessageBubble = ({ message }) => {
   };
 
   return (
-    <div className={`flex items-start space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`}>
-      {/* Avatar */}
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
+    <div className={`flex items-start space-x-2 sm:space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`}>
+      {/* Avatar - Slightly smaller on mobile */}
+      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-medium flex-shrink-0 ${
         isUser ? 'bg-green-600 dark:bg-green-500' : 'bg-blue-600 dark:bg-blue-500'
       }`}>
         {isUser ? 'You' : 'AI'}
       </div>
 
       {/* Message Content */}
-      <div className={`flex-1 max-w-2xl ${isUser ? 'flex flex-col items-end' : ''}`}>
-        <div className={`group relative rounded-2xl px-4 py-3 shadow-sm ${
+      <div className={`flex-1 max-w-[85%] sm:max-w-2xl ${isUser ? 'flex flex-col items-end' : ''}`}>
+        <div className={`group relative rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-sm ${
           isUser 
             ? 'bg-blue-600 dark:bg-blue-500 text-white rounded-br-md' 
             : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-bl-md'
         }`}>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
           
-          {/* File Attachments */}
+          {/* File Attachments - Improved for mobile */}
           {message.attachments && message.attachments.length > 0 && (
-            <div className="mt-3 space-y-2">
+            <div className="mt-2 sm:mt-3 space-y-2">
               {message.attachments.map((attachment) => (
                 <div key={attachment.id}>
                   {attachment.type.startsWith('image/') ? (
-                    // Image Preview
-                    <div className={`relative rounded-lg overflow-hidden max-w-sm ${
+                    // Image Preview - Responsive sizing
+                    <div className={`relative rounded-lg overflow-hidden max-w-[260px] sm:max-w-sm ${
                       isUser ? 'ml-auto' : ''
                     }`}>
                       <img
                         src={attachment.url}
                         alt={attachment.name}
-                        className="w-full h-auto max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-full h-auto max-h-48 sm:max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         crossOrigin="anonymous"
                         onClick={() => {
                           // Open image in new tab for full view
@@ -91,6 +91,7 @@ const MessageBubble = ({ message }) => {
                           }}
                           className="p-1.5 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-colors"
                           title="Download image"
+                          aria-label="Download image"
                         >
                           <Download className="h-3 w-3" />
                         </button>
@@ -105,13 +106,13 @@ const MessageBubble = ({ message }) => {
                       </div>
                     </div>
                   ) : (
-                    // Regular File Attachment
-                    <div className={`flex items-center space-x-3 p-3 rounded-lg border ${
+                    // Regular File Attachment - More compact on mobile
+                    <div className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg border ${
                       isUser ? 'bg-blue-500 dark:bg-blue-600 border-blue-400 dark:border-blue-500' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
                     }`}>
                       {getFileIcon(attachment.type, attachment.name)}
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium truncate ${
+                        <p className={`text-xs sm:text-sm font-medium truncate ${
                           isUser ? 'text-white' : 'text-gray-900 dark:text-white'
                         }`}>
                           {attachment.name}
@@ -129,9 +130,10 @@ const MessageBubble = ({ message }) => {
                           link.download = attachment.name;
                           link.click();
                         }}
-                        className={`p-1 rounded hover:bg-opacity-20 hover:bg-white transition-colors ${
+                        className={`p-1.5 rounded-full hover:bg-opacity-20 hover:bg-white transition-colors ${
                           isUser ? 'text-white' : 'text-gray-500 dark:text-gray-400'
                         }`}
+                        aria-label="Download file"
                       >
                         <Download className="h-4 w-4" />
                       </button>
@@ -142,21 +144,22 @@ const MessageBubble = ({ message }) => {
             </div>
           )}
 
-          {/* Copy Button */}
+          {/* Copy Button - Always visible on mobile for better UX */}
           <button
             onClick={handleCopy}
-            className={`absolute top-2 right-2 p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity ${
+            className={`absolute top-1.5 sm:top-2 right-1.5 sm:right-2 p-1.5 rounded sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ${
               isUser 
-                ? 'hover:bg-white hover:bg-opacity-20 text-white' 
-                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400'
+                ? 'hover:bg-white hover:bg-opacity-20 text-white opacity-70 sm:opacity-0' 
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 opacity-70 sm:opacity-0'
             }`}
+            aria-label={copied ? "Copied" : "Copy message"}
           >
-            {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            {copied ? <CheckCircle className="h-3.5 sm:h-4 w-3.5 sm:w-4" /> : <Copy className="h-3.5 sm:h-4 w-3.5 sm:w-4" />}
           </button>
         </div>
 
         {/* Timestamp */}
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
+        <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
           {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>

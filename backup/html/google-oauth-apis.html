@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google APIs to Enable for OAuth</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    h1, h2, h3 { 
+      color: #1a73e8;
+    }
+    .api-card {
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #f8f9fa;
+    }
+    .api-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 18px;
+    }
+    .api-description {
+      margin-bottom: 10px;
+      color: #5f6368;
+    }
+    .api-link {
+      display: inline-block;
+      background-color: #1a73e8;
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+    .api-link:hover {
+      background-color: #174ea6;
+    }
+    .required {
+      background-color: #e6f4ea;
+      border-left: 4px solid #34a853;
+    }
+    .recommended {
+      background-color: #fef7e0;
+      border-left: 4px solid #fbbc04;
+    }
+    .status {
+      font-weight: bold;
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-right: 10px;
+    }
+    .required-tag {
+      background-color: #e6f4ea;
+      color: #137333;
+    }
+    .recommended-tag {
+      background-color: #fef7e0;
+      color: #ea8600;
+    }
+  </style>
+</head>
+<body>
+  <h1>Required Google APIs for OAuth Authentication</h1>
+  <p>To fix the "Error 401: invalid_client" issue, make sure these APIs are enabled in your Google Cloud project.</p>
+
+  <div class="api-card required">
+    <div class="api-title">
+      <span class="status required-tag">REQUIRED</span>
+      Google Sign-In API
+    </div>
+    <div class="api-description">
+      Core API for OAuth authentication that allows users to sign in with their Google accounts.
+    </div>
+    <a href="https://console.cloud.google.com/apis/library/signin.googleapis.com" target="_blank" class="api-link">Enable API</a>
+  </div>
+
+  <div class="api-card required">
+    <div class="api-title">
+      <span class="status required-tag">REQUIRED</span>
+      People API
+    </div>
+    <div class="api-description">
+      Provides access to user profile information like name, email, and profile picture.
+      (This replaces the older Google+ API)
+    </div>
+    <a href="https://console.cloud.google.com/apis/library/people.googleapis.com" target="_blank" class="api-link">Enable API</a>
+  </div>
+
+  <div class="api-card required">
+    <div class="api-title">
+      <span class="status required-tag">REQUIRED</span>
+      Google Identity Services API
+    </div>
+    <div class="api-description">
+      Core authentication service that handles OAuth 2.0 flows and identity tokens.
+    </div>
+    <a href="https://console.cloud.google.com/apis/library/identitytoolkit.googleapis.com" target="_blank" class="api-link">Enable API</a>
+  </div>
+
+  <div class="api-card recommended">
+    <div class="api-title">
+      <span class="status recommended-tag">RECOMMENDED</span>
+      Identity and Access Management (IAM) API
+    </div>
+    <div class="api-description">
+      Supports identity management and access control for your project.
+    </div>
+    <a href="https://console.cloud.google.com/apis/library/iam.googleapis.com" target="_blank" class="api-link">Enable API</a>
+  </div>
+
+  <h2>Additional Steps for Fixing OAuth Issues</h2>
+
+  <h3>1. Verify OAuth Client Configuration</h3>
+  <p>Make sure your OAuth client settings match your environment variables:</p>
+  <ul>
+    <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Credentials</a></li>
+    <li>Edit your OAuth 2.0 Client ID</li>
+    <li>Verify Authorized JavaScript Origins: <code>http://localhost:5173</code></li>
+    <li>Verify Authorized Redirect URIs: <code>http://localhost:5000/api/auth/google/callback</code></li>
+  </ul>
+
+  <h3>2. Check OAuth Consent Screen</h3>
+  <p>Ensure your consent screen is properly configured:</p>
+  <ul>
+    <li>Go to <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">OAuth Consent Screen</a></li>
+    <li>Add your email address as a test user</li>
+    <li>Verify scopes include profile and email</li>
+    <li>Make sure all required fields are filled out</li>
+  </ul>
+
+  <h3>3. Test Your Configuration</h3>
+  <p>After enabling these APIs and verifying settings:</p>
+  <ol>
+    <li>Restart your server: <code>npm run server</code></li>
+    <li>Try signing in with Google again</li>
+    <li>If it fails, check server logs for detailed error messages</li>
+  </ol>
+
+  <p><strong>Note:</strong> After enabling APIs, it may take a few minutes for changes to propagate through Google's systems.</p>
+</body>
+</html>

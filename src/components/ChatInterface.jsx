@@ -382,86 +382,113 @@ console.log("Token:", token);
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+      {/* Header - Improved for mobile */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center justify-between w-full sm:w-auto">
             <div>
-              <h1 className="text-xl font-semibold text-gray-800 dark:text-white">AI Assistant</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Upload files and chat with AI</p>
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-white">AI Assistant</h1>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Upload files and chat with AI</p>
             </div>
             
-            {/* Chat Selector */}
-            <div className="relative" ref={chatSelectorRef}>
+            {/* Mobile-only theme toggle, profile and logout buttons */}
+            <div className="flex items-center space-x-2 sm:hidden">
               <button
-                onClick={() => setShowChatSelector(!showChatSelector)}
-                className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                onClick={toggleTheme}
+                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                aria-label="Toggle theme"
               >
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {chats.find(chat => chat._id === currentChatId)?.title || 'Select Chat'}
-                </span>
-                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
-              
-              {showChatSelector && (
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
-                  <div className="p-2">
-                    <button
-                      onClick={createNewChatAndSwitch}
-                      className="w-full text-left px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
-                    >
-                      + New Chat
-                    </button>
-                    <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-                    {chats.map((chat) => (
-                      <div
-                        key={chat._id}
-                        className={`flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${
-                          chat._id === currentChatId
-                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                      >
-                        <button
-                          onClick={() => switchToChat(chat._id)}
-                          className="flex-1 text-left"
-                        >
-                          <div className="font-medium truncate">{chat.title}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {new Date(chat.lastActivity).toLocaleDateString()}
-                          </div>
-                        </button>
-                        <button
-                          onClick={(e) => deleteChat(chat._id, e)}
-                          disabled={isDeleting}
-                          className={`ml-2 p-1 transition-colors ${
-                            isDeleting 
-                              ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' 
-                              : 'text-gray-400 hover:text-red-500 dark:hover:text-red-400'
-                          }`}
-                          title={isDeleting ? "Deleting..." : "Delete chat"}
-                        >
-                          {isDeleting ? (
-                            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                          ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          )}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <button
+                onClick={onShowProfile}
+                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                aria-label="View profile"
+              >
+                <User className="h-5 w-5" />
+              </button>
+              <button
+                onClick={logout}
+                className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                aria-label="Logout"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          
+          {/* Chat Selector - Full width on mobile */}
+          <div className="relative w-full sm:w-auto" ref={chatSelectorRef}>
+            <button
+              onClick={() => setShowChatSelector(!showChatSelector)}
+              className="flex items-center justify-between w-full sm:w-auto space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            >
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[180px]">
+                {chats.find(chat => chat._id === currentChatId)?.title || 'Select Chat'}
+              </span>
+              <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+              
+            {showChatSelector && (
+              <div className="absolute top-full left-0 mt-2 w-full sm:w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+                <div className="p-2">
+                  <button
+                    onClick={createNewChatAndSwitch}
+                    className="w-full text-left px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                  >
+                    + New Chat
+                  </button>
+                  <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                  {chats.map((chat) => (
+                    <div
+                      key={chat._id}
+                      className={`flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${
+                        chat._id === currentChatId
+                          ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <button
+                        onClick={() => switchToChat(chat._id)}
+                        className="flex-1 text-left"
+                      >
+                        <div className="font-medium truncate">{chat.title}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(chat.lastActivity).toLocaleDateString()}
+                        </div>
+                      </button>
+                      <button
+                        onClick={(e) => deleteChat(chat._id, e)}
+                        disabled={isDeleting}
+                        className={`ml-2 p-1 transition-colors ${
+                          isDeleting 
+                            ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' 
+                            : 'text-gray-400 hover:text-red-500 dark:hover:text-red-400'
+                        }`}
+                        title={isDeleting ? "Deleting..." : "Delete chat"}
+                      >
+                        {isDeleting ? (
+                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Desktop user controls - hidden on mobile */}
+          <div className="hidden sm:flex items-center space-x-3">
             <div className="flex items-center space-x-2">
               {user?.profileImage && user.profileImage !== 'undefined/uploads/' ? (
                 <img
@@ -491,7 +518,7 @@ console.log("Token:", token);
                   <User className="h-4 w-4 text-white" />
                 </div>
               )}
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:inline">
                 {user?.name}
               </span>
             </div>
@@ -505,12 +532,14 @@ console.log("Token:", token);
             <button
               onClick={toggleTheme}
               className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+              aria-label="Toggle theme"
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
             <button
               onClick={logout}
               className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+              aria-label="Logout"
             >
               <LogOut className="h-5 w-5" />
             </button>
@@ -518,25 +547,25 @@ console.log("Token:", token);
         </div>
       </div>
 
-      {/* Messages Container */}
+      {/* Messages Container - Improved padding for mobile */}
       <div
-        className={`flex-1 overflow-y-auto px-4 py-6 ${dragActive ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+        className={`flex-1 overflow-y-auto px-2 sm:px-4 py-4 sm:py-6 ${dragActive ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
       >
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
           ))}
           
           {isTyping && (
-            <div className="flex items-start space-x-3">
+            <div className="flex items-start space-x-2 sm:space-x-3">
               <div className="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
                 AI
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-bl-md px-3 sm:px-4 py-2 sm:py-3 shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -563,14 +592,15 @@ console.log("Token:", token);
         )}
       </div>
 
-      {/* Input Area */}
-      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-4">
+      {/* Input Area - Better spacing and touch targets for mobile */}
+      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3 sm:py-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-end space-x-3">
+          <div className="flex items-end space-x-2 sm:space-x-3">
             <button
               onClick={() => fileInputRef.current?.click()}
               className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
               title="Upload files or images"
+              aria-label="Attach file"
             >
               <Paperclip className="h-5 w-5" />
             </button>
@@ -581,7 +611,7 @@ console.log("Token:", token);
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
-                className="w-full resize-none rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 px-4 py-3 pr-12 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:outline-none max-h-32 min-h-[48px]"
+                className="w-full resize-none rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 px-3 sm:px-4 py-2 sm:py-3 pr-12 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:outline-none max-h-32 min-h-[44px] text-sm sm:text-base"
                 rows={1}
                 style={{ height: 'auto' }}
                 onInput={(e) => {
@@ -594,7 +624,8 @@ console.log("Token:", token);
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim()}
-                className="absolute right-2 bottom-2 p-2 bg-blue-600 dark:bg-blue-500 text-white rounded-full hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="absolute right-2 bottom-1.5 p-1.5 sm:p-2 bg-blue-600 dark:bg-blue-500 text-white rounded-full hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Send message"
               >
                 <Send className="h-4 w-4" />
               </button>

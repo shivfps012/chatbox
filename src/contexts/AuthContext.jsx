@@ -47,10 +47,11 @@ export const AuthProvider = ({ children }) => {
       verifyToken(storedToken);
     } else {
       // Check for Google OAuth success redirect
+      // Note: We now handle this separately in the GoogleAuthSuccess component
       const urlParams = new URLSearchParams(window.location.search);
       const authToken = urlParams.get('token');
       
-      if (authToken) {
+      if (authToken && window.location.pathname !== '/auth/success') {
         handleGoogleAuthSuccess(authToken);
         // Clean up URL
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -99,9 +100,14 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
+        return { success: true };
+      } else {
+        const errorData = await response.json();
+        return { success: false, message: errorData.message || 'Authentication failed' };
       }
     } catch (error) {
       console.error('Google auth success handling failed:', error);
+      return { success: false, message: error.message || 'Authentication failed' };
     }
   };
 
@@ -313,6 +319,7 @@ export const AuthProvider = ({ children }) => {
       forgotPassword,
       resetPassword,
       googleLogin,
+      handleGoogleAuthSuccess,
       getAuthHeaders,
       isLoading 
     }}>

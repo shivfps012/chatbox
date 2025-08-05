@@ -7,12 +7,14 @@ const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
+const passport = require('passport');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
 const fileRoutes = require('./routes/files');
 const userRoutes = require('./routes/user');
+const statsRoutes = require('./routes/stats');
 
 const app = express();
 
@@ -66,6 +68,10 @@ app.use('/uploads', (req, res, next) => {
   next();
 }, express.static('uploads'));
 
+// Initialize Passport
+app.use(passport.initialize());
+require('./config/passport');
+
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/chatapp')
 .then(() => console.log('Connected to MongoDB'))
@@ -76,6 +82,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

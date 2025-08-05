@@ -12,10 +12,12 @@
     "start": "node start-dev.js",
     "dev:full": "node start-dev.js",
     "setup": "node setup.js",
-    "validate": "node validate-config.js"
+    "validate": "node validate-config.js",
+    "verify:google": "node verify-google-oauth.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "chalk": "^5.5.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -29,11 +31,13 @@
     "multer": "^2.0.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.5",
+    "open": "^10.2.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^7.7.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

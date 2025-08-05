@@ -1,9 +1,12 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ChatInterface from './components/ChatInterface.jsx';
 import AuthForm from './components/AuthForm.jsx';
 import ResetPasswordForm from './components/ResetPasswordForm.jsx';
 import ProfileSection from './components/ProfileSection.jsx';
+import GoogleAuthSuccess from './components/GoogleAuthSuccess.jsx';
+import AdminDashboard from './components/AdminDashboard.jsx';
 import HealthCheck from './components/HealthCheck.jsx';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
@@ -47,14 +50,23 @@ const AppContent = () => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <div className="h-screen">
-          <AppContent />
-          <HealthCheck />
-        </div>
-      </AuthProvider>
-    </ThemeProvider>
+    <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <div className="h-screen">
+            <Routes>
+              <Route path="/auth/success" element={<GoogleAuthSuccess />} />
+              <Route path="*" element={
+                <>
+                  <AppContent />
+                  <HealthCheck />
+                </>
+              } />
+            </Routes>
+          </div>
+        </AuthProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }
 

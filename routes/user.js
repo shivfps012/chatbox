@@ -140,8 +140,7 @@ router.delete('/profile-image', auth, async (req, res) => {
 // @access  Private
 router.get('/stats', auth, async (req, res) => {
   try {
-    const [chatCount, messageStats, fileCount] = await Promise.all([
-      Chat.countDocuments({ userId: req.user._id, isActive: true }),
+    const [messageStats, fileCount] = await Promise.all([
       Chat.aggregate([
         { $match: { userId: req.user._id, isActive: true } },
         { $project: { messageCount: { $size: '$messages' } } },
@@ -150,15 +149,19 @@ router.get('/stats', auth, async (req, res) => {
       File.countDocuments({ userId: req.user._id, isActive: true })
     ]);
 
+    // Calculate days active since registration
+    const currentDate = new Date();
+    const registrationDate = new Date(req.user.createdAt);
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const daysActive = Math.ceil((currentDate - registrationDate) / msPerDay);
+    
     const stats = {
-      chats: chatCount,
-      messages: messageStats[0]?.total || 0,
-      files: fileCount,
-      joinDate: req.user.createdAt,
-      lastLogin: req.user.lastLogin
+      messagesSent: messageStats[0]?.total || 0,
+      filesUploaded: fileCount,
+      daysActive: Math.max(1, daysActive) // At least 1 day active
     };
 
-    res.json({ stats });
+    res.json(stats);
   } catch (error) {
     console.error('Get stats error:', error);
     res.status(500).json({ message: 'Server error' });

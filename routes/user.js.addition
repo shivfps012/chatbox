@@ -1,0 +1,43 @@
+// @route   GET /api/user/stats
+// @desc    Get user statistics
+// @access  Private
+router.get('/stats', auth, async (req, res) => {
+  try {
+    // Get messages sent
+    const userChats = await Chat.find({ userId: req.user._id });
+    let messagesSent = 0;
+    
+    // Count messages sent by the user
+    userChats.forEach(chat => {
+      messagesSent += chat.messages.filter(msg => 
+        msg.senderId.toString() === req.user._id.toString() && !msg.isSystemMessage
+      ).length;
+    });
+    
+    // Get files uploaded
+    const filesUploaded = await File.countDocuments({ userId: req.user._id });
+    
+    // Calculate days active
+    const currentDate = new Date();
+    const registrationDate = new Date(req.user.createdAt);
+    const lastLogin = new Date(req.user.lastLogin);
+    
+    // Get the number of days since registration
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const daysSinceRegistration = Math.ceil((currentDate - registrationDate) / msPerDay);
+    
+    // Calculate days active (this is an estimate - in a real app you'd have a login history)
+    // For this example, we'll use a simple calculation based on last login and registration date
+    const daysActive = Math.min(daysSinceRegistration, 
+      Math.ceil((lastLogin - registrationDate) / msPerDay) + 1);
+    
+    res.json({
+      messagesSent,
+      filesUploaded,
+      daysActive: Math.max(1, daysActive) // At least 1 day active
+    });
+  } catch (error) {
+    console.error('Error getting user statistics:', error);
+    res.status(500).json({ message: 'Server error getting statistics' });
+  }
+});

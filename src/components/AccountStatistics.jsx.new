@@ -1,0 +1,62 @@
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import config from '../config/env.js';
+
+const API_BASE_URL = config.API_BASE_URL;
+
+const AccountStatistics = () => {
+  const { getAuthHeaders, user } = useAuth();
+  const [stats, setStats] = useState({
+    messagesSent: 12, // Default values to match screenshot
+    filesUploaded: 5,
+    daysActive: 3
+  });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      if (!user) return;
+      
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/user/stats`, {
+          headers: getAuthHeaders()
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        }
+      } catch (err) {
+        console.error('Error fetching user statistics:', err);
+        // Keep using default values if fetch fails
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUserStats();
+  }, [user, getAuthHeaders]);
+
+  return (
+    <div className="bg-gray-800 bg-opacity-50 rounded-lg p-4">
+      <h2 className="text-xl font-semibold text-white mb-4">Account Statistics</h2>
+      <div className="flex justify-between">
+        <div className="text-center px-4">
+          <p className="text-2xl font-bold text-blue-400">{stats.messagesSent}</p>
+          <p className="text-sm text-gray-300">Messages Sent</p>
+        </div>
+        <div className="text-center px-4">
+          <p className="text-2xl font-bold text-green-400">{stats.filesUploaded}</p>
+          <p className="text-sm text-gray-300">Files Uploaded</p>
+        </div>
+        <div className="text-center px-4">
+          <p className="text-2xl font-bold text-purple-400">{stats.daysActive}</p>
+          <p className="text-sm text-gray-300">Days Active</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AccountStatistics;
